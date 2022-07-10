@@ -1,9 +1,13 @@
 package ya.yandex.practicum;
 
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.RestAssured;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import ya.yandex.practicum.steps.OrderSteps;
 
 import java.util.*;
 
@@ -16,6 +20,11 @@ public class CreateOrderTest extends OrderSteps {
         this.color = color;
     }
 
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = Constants.URL;
+    }
+
     @Test
     @DisplayName("Создание нового заказа")
     public void createNewOrder() {
@@ -24,7 +33,17 @@ public class CreateOrderTest extends OrderSteps {
         trackOrder = sendRequestCreateOrder(color);
 
         //Проверяем, что созданный заказ существует
-        sendRequestGetOrder(trackOrder);
+        sendRequestCheckOrderByTrackExists(trackOrder);
+
+    }
+
+    @After
+    public void cleanUp() {
+
+        if (trackOrder != null) {
+            sendRequestCancelOrder(trackOrder);
+            trackOrder = null;
+        }
 
     }
 

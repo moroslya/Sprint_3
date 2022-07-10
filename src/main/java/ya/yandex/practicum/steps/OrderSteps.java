@@ -1,35 +1,17 @@
-package ya.yandex.practicum;
+package ya.yandex.practicum.steps;
 
 import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.junit.After;
-import org.junit.Before;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import ya.yandex.practicum.data.Order;
 
 import java.util.List;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 public class OrderSteps {
 
     public Integer trackOrder;
-
-    @Before
-    public void setUp() {
-        RestAssured.baseURI = Constants.URL;
-    }
-
-    @After
-    public void cleanUp() {
-
-        if (trackOrder != null) {
-            sendRequestCancelOrder(trackOrder);
-            trackOrder = null;
-        }
-
-    }
 
     @Step("Проверка успешного создания заказа с цветом: {color}")
     public Integer sendRequestCreateOrder(List<String> color) {
@@ -46,7 +28,7 @@ public class OrderSteps {
                 color
         );
 
-        Response response = given()
+        Response response = RestAssured.given()
                 .header("Content-type", "application/json")
                 .and()
                 .body(order)
@@ -54,42 +36,42 @@ public class OrderSteps {
 
         response.then().statusCode(201)
                 .and()
-                .assertThat().body("track", notNullValue());
+                .assertThat().body("track", Matchers.notNullValue());
 
         return response.jsonPath().getInt("track");
 
     }
 
-    @Step("Проверка получения заказа c track = {track}")
-    public void sendRequestGetOrder(Integer track) {
+    @Step("Проверка существования заказа c track = {track}")
+    public void sendRequestCheckOrderByTrackExists(Integer track) {
 
-        Response response = given()
+        Response response = RestAssured.given()
                 .get("/api/v1/orders/track?t={track}", track);
 
         response.then().statusCode(200)
                 .and()
-                .assertThat().body("order", notNullValue())
+                .assertThat().body("order", Matchers.notNullValue())
                 .and()
-                .assertThat().body("order.track", equalTo(track));
+                .assertThat().body("order.track", Matchers.equalTo(track));
 
     }
 
     @Step("Проверка, что возвращается не пустой список заказов")
-    public void sendRequestGetListOfOrders() {
+    public void sendRequestCheckingNonEmptyListOfOrdersReturned() {
 
-        Response response = given()
+        Response response = RestAssured.given()
                 .get("/api/v1/orders");
 
         response.then().statusCode(200)
-                .and().body("orders", notNullValue());
+                .and().body("orders", Matchers.notNullValue());
 
-        assertThat(response.jsonPath().getList("orders").size(), greaterThan(0));
+        MatcherAssert.assertThat(response.jsonPath().getList("orders").size(), Matchers.greaterThan(0));
 
     }
 
     public void sendRequestCancelOrder(Integer track) {
 
-        given()
+        RestAssured.given()
                 .header("Content-type", "application/json")
                 .queryParam("track", track)
                 .put("/api/v1/orders/cancel")

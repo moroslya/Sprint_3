@@ -1,12 +1,21 @@
 package ya.yandex.practicum;
 
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.RestAssured;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import ya.yandex.practicum.data.Courier;
+import ya.yandex.practicum.steps.CourierSteps;
 
 public class AuthorizationCourierTest extends CourierSteps {
 
     private Integer idCourier;
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = Constants.URL;
+    }
 
     @Test
     @DisplayName("Авторизация существующим курьером")

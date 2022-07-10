@@ -1,4 +1,4 @@
-package ya.yandex.practicum;
+package ya.yandex.practicum.data;
 
 public class Courier {
 
