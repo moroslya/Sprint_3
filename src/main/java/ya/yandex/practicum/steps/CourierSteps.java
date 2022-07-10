@@ -1,12 +1,14 @@
 package ya.yandex.practicum.steps;
 
 import io.qameta.allure.Step;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.hamcrest.Matchers;
 import ya.yandex.practicum.data.Courier;
 
 import java.sql.Timestamp;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class CourierSteps {
 
@@ -17,7 +19,7 @@ public class CourierSteps {
 
         response.then().statusCode(201)
                 .and()
-                .assertThat().body("ok", Matchers.equalTo(true));
+                .assertThat().body("ok", equalTo(true));
 
     }
 
@@ -28,7 +30,7 @@ public class CourierSteps {
 
         response.then().statusCode(200)
                 .and()
-                .assertThat().body("id", Matchers.notNullValue());
+                .assertThat().body("id", notNullValue());
 
         return response.jsonPath().getInt("id");
 
@@ -41,7 +43,7 @@ public class CourierSteps {
 
         response.then().statusCode(409)
                 .and()
-                .assertThat().body("message", Matchers.equalTo("Этот логин уже используется"));
+                .assertThat().body("message", equalTo("Этот логин уже используется"));
 
     }
 
@@ -54,7 +56,7 @@ public class CourierSteps {
 
         responseCreateCourier.then().statusCode(400)
                 .and()
-                .assertThat().body("message", Matchers.equalTo("Недостаточно данных для создания учетной записи"));
+                .assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"));
 
     }
 
@@ -65,7 +67,7 @@ public class CourierSteps {
 
         responseAuthorizationCourier.then().statusCode(400)
                 .and()
-                .assertThat().body("message", Matchers.equalTo("Недостаточно данных для входа"));
+                .assertThat().body("message", equalTo("Недостаточно данных для входа"));
 
     }
 
@@ -76,7 +78,7 @@ public class CourierSteps {
 
         responseAuthorizationCourier.then().statusCode(404)
                 .and()
-                .assertThat().body("message", Matchers.equalTo("Учетная запись не найдена"));
+                .assertThat().body("message", equalTo("Учетная запись не найдена"));
 
     }
 
@@ -89,7 +91,7 @@ public class CourierSteps {
 
     public Response sendRequestCreateCourier(Courier courier){
 
-        return RestAssured.given()
+        return given()
                 .header("Content-type", "application/json")
                 .and()
                 .body(courier)
@@ -99,7 +101,7 @@ public class CourierSteps {
 
     public Response sendRequestAuthorizationCourier(Courier courier){
 
-        return RestAssured.given()
+        return given()
                 .header("Content-type", "application/json")
                 .and()
                 .body(courier)
@@ -109,7 +111,7 @@ public class CourierSteps {
 
     public void sendRequestDeleteCourier(Integer id) {
 
-        RestAssured.given()
+        given()
                 .header("Content-type", "application/json")
                 .delete("/api/v1/courier/{id}", id)
                 .then()

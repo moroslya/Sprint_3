@@ -1,13 +1,16 @@
 package ya.yandex.practicum.steps;
 
 import io.qameta.allure.Step;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import ya.yandex.practicum.data.Order;
 
 import java.util.List;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThan;
 
 public class OrderSteps {
 
@@ -28,7 +31,7 @@ public class OrderSteps {
                 color
         );
 
-        Response response = RestAssured.given()
+        Response response = given()
                 .header("Content-type", "application/json")
                 .and()
                 .body(order)
@@ -36,7 +39,7 @@ public class OrderSteps {
 
         response.then().statusCode(201)
                 .and()
-                .assertThat().body("track", Matchers.notNullValue());
+                .assertThat().body("track", notNullValue());
 
         return response.jsonPath().getInt("track");
 
@@ -45,33 +48,33 @@ public class OrderSteps {
     @Step("Проверка существования заказа c track = {track}")
     public void sendRequestCheckOrderByTrackExists(Integer track) {
 
-        Response response = RestAssured.given()
+        Response response = given()
                 .get("/api/v1/orders/track?t={track}", track);
 
         response.then().statusCode(200)
                 .and()
-                .assertThat().body("order", Matchers.notNullValue())
+                .assertThat().body("order", notNullValue())
                 .and()
-                .assertThat().body("order.track", Matchers.equalTo(track));
+                .assertThat().body("order.track", equalTo(track));
 
     }
 
     @Step("Проверка, что возвращается не пустой список заказов")
     public void sendRequestCheckingNonEmptyListOfOrdersReturned() {
 
-        Response response = RestAssured.given()
+        Response response = given()
                 .get("/api/v1/orders");
 
         response.then().statusCode(200)
-                .and().body("orders", Matchers.notNullValue());
+                .and().body("orders", notNullValue());
 
-        MatcherAssert.assertThat(response.jsonPath().getList("orders").size(), Matchers.greaterThan(0));
+        MatcherAssert.assertThat(response.jsonPath().getList("orders").size(), greaterThan(0));
 
     }
 
     public void sendRequestCancelOrder(Integer track) {
 
-        RestAssured.given()
+        given()
                 .header("Content-type", "application/json")
                 .queryParam("track", track)
                 .put("/api/v1/orders/cancel")
